@@ -5,10 +5,15 @@ Created on Fri Dec 14 15:11:22 2018
 @author: Aidin
 """
 
+
+
+import matplotlib.pyplot as plt
 import numpy as np
 
+
+
 class kBandit:
-    def __init__(self, k = 10, initial = 0 , reward = 0 , epsilon):
+    def __init__(self, epsilon, k = 10, initial = 0. , reward = 0. ):
         # number of arms
         self.k = k 
         # instantanous reward
@@ -30,12 +35,12 @@ class kBandit:
         self.muEstimated = np.zeros(self.k) + self.initial
         
         # initialize number of times each arm is played
-        self.playCount = np.zeros(self.k)
+        self.playCount = np.zeros(self.k) + 1
         
         # best action
-        self.bestAction =  np.argmax(self.mu)
+        self.bestArm =  np.argmax(self.mu)
         
-    def algorithm(self):
+    def act(self):
         # exploration
         if np.random.rand() < self.eps:
             return np.random.choice(self.arms)
@@ -54,7 +59,41 @@ class kBandit:
         self.muEstimated[arm] += 1.0 / self.playCount[arm] * (observedReward - self.muEstimated[arm])
         
         return observedReward
-        
-if __name__ == '__main__':
     
+
+def simulation(iterations, timeSteps, Bandits):
+    bestArmCount = np.zeros((len(Bandits),iterations, timeSteps)) #total number of best arm played
+    rewards = np.zeros(bestArmCount.shape) #average reward 
+    bandit = Bandits #bandist defined here
+    for b, bandit in enumerate(Bandits):
+        for i in range(iterations):
+            bandit.initialize()
+            if i % 200 == 0:
+                print ("iteration:" , i)
+            for t in range(timeSteps):
+                if i % 200 == 0 and t % 200 == 0:
+                    print("Timestep" , t)
+                arm = bandit.act()
+                reward = bandit.play(arm)
+                rewards[b,i,t] = reward
+                if arm == bandit.bestArm:
+                    bestArmCount [b,i,t] = 1
+    return bestArmCount.mean(axis = 1), rewards.mean(axis = 1)
+            
+if __name__ == '__main__':
+    iterations = 2000
+    timeSteps = 1000
+    epss = [0, 0.1, 0.01]
+    bandits = [kBandit(epsilon=eps) for eps in epss]
+    bestArmCount, rewards= simulation(iterations, timeSteps, bandits)
+    
+    # draw the results
+    plt.figure(figsize=(10, 10))
+
+    plt.subplot(1, 1, 1)
+    for eps, rewards in zip(epss, rewards):
+        plt.plot(rewards, label='epsilon = %.02f' % (eps))
+    plt.xlabel('steps')
+    plt.ylabel('average reward')
+    plt.legend()
     
