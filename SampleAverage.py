@@ -35,7 +35,7 @@ class kBandit:
         self.muEstimated = np.zeros(self.k) + self.initial
         
         # initialize number of times each arm is played
-        self.playCount = np.zeros(self.k) + 1
+        self.playCount = np.zeros(self.k)
         
         # best action
         self.bestArm =  np.argmax(self.mu)
@@ -54,10 +54,9 @@ class kBandit:
                 
         # one step forward in time
         self.time += 1 
-        
+        self.playCount[arm] += 1
         # update the estimation with sample average algorithm
         self.muEstimated[arm] += 1.0 / self.playCount[arm] * (observedReward - self.muEstimated[arm])
-        
         return observedReward
     
 
@@ -80,8 +79,8 @@ def simulation(iterations, timeSteps, Bandits):
     return bestArmCount.mean(axis = 1), rewards.mean(axis = 1)
             
 if __name__ == '__main__':
-    iterations = 1000
-    timeSteps = 1000
+    iterations = 4000
+    timeSteps = 2000
     epss = [0, 0.1, 0.01]
     bandits = [kBandit(epsilon=eps) for eps in epss]
     bestArmCount, rewards= simulation(iterations, timeSteps, bandits)
@@ -95,4 +94,6 @@ if __name__ == '__main__':
     plt.xlabel('steps')
     plt.ylabel('average reward')
     plt.legend()
+    
+    plt.savefig('epsilonComparison.png')
     
