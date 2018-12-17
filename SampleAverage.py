@@ -74,14 +74,13 @@ def simulation(iterations, timeSteps, Bandits):
                 if i % 200 == 0 and t % 200 == 0:
                     print("Timestep" , t)
                 arm = bandit.act()
-                reward = bandit.play(arm)
-                rewards[b,i,t] = reward
+                rewards[b,i,t] = bandit.play(arm)
                 if arm == bandit.bestArm:
                     bestArmCount [b,i,t] = 1
     return bestArmCount.mean(axis = 1), rewards.mean(axis = 1)
             
 if __name__ == '__main__':
-    iterations = 2000
+    iterations = 1000
     timeSteps = 1000
     epss = [0, 0.1, 0.01]
     bandits = [kBandit(epsilon=eps) for eps in epss]
